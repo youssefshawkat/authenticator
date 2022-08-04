@@ -15,6 +15,10 @@ interface UserDao {
     @Query("select * From user")
     fun getAllUsers(): List<User>
 
+    @Query("select * From user Where email = :InputEmail And password = :InputPassword")
+    fun getUser( InputEmail: String, InputPassword: String?): List<User>
+
+
     @Insert
     fun insertUser(user: User)
 }

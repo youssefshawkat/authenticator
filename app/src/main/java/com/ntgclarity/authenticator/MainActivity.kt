@@ -7,18 +7,27 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import androidx.room.Room
+import com.ntgclarity.authenticator.database.UsersDatabase
 import com.ntgclarity.authenticator.words.WordsActivity
 
 class MainActivity : AppCompatActivity() {
     val kEmail = "signature"
-
+    var database: UsersDatabase? = null
     var etEmail: EditText? = null
+    var etPassword : EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        database = Room.databaseBuilder(this, UsersDatabase::class.java, "users.db")
+            .allowMainThreadQueries()
+            .build()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         etEmail = findViewById<EditText>(R.id.et_email)
+        etPassword = findViewById<EditText>(R.id.et_password)
 
         loadUserEmail()
 
@@ -32,15 +41,12 @@ class MainActivity : AppCompatActivity() {
 
         btnLogin.setOnClickListener {
             val email = etEmail?.text.toString()
+            val password = etPassword?.text.toString()
 
-//            shared.edit()
-//                .putString(kEmail, email)
-//                .apply()
+            verifyUser(email, password)
 
-            updateSignature(email)
-
-            startWords()
         }
+
 
         btnSettings.setOnClickListener {
             startSettings()
@@ -61,6 +67,22 @@ class MainActivity : AppCompatActivity() {
         defaultPref.edit()
             .putString(kEmail, text)
             .apply()
+    }
+    private fun verifyUser(email: String, password : String){
+
+        val users = database?.userDao()?.getUser(email,password)
+
+
+            if(users?.isNotEmpty() == true){
+                Log.d("###", "Welcome Back!")
+                startWords()
+
+            }else{
+                Log.d("###", "Wrong Email or Password!")
+
+            }
+
+
     }
 
     fun tryFiles() {
